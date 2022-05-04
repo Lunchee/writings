@@ -1,13 +1,17 @@
 package lunchee.books.author.query;
 
 import lunchee.books.configuration.QueryTest;
+import lunchee.books.util.AuthorGenerator;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
+import static lunchee.books.author.command.domain.NameType.ORIGINAL;
+import static lunchee.books.author.command.domain.NameType.TRANSLITERATION;
 import static lunchee.books.util.TestUtils.readResource;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,10 +20,12 @@ class AuthorQueryRepositoryTest {
 
     @Autowired
     private Jdbi jdbi;
+    @Autowired
+    private AuthorGenerator authorGenerator;
 
     @Test
     public void should_select_existing_author_by_id_with_all_fields_set() {
-        Author existingAuthor = givenExistingAuthor(Author.builder()
+        Author existingAuthor = authorGenerator.givenExistingAuthor(Author.builder()
                 .birthYear(1799)
                 .deathYear(1837)
                 .whereabouts("Saint-Petersburg, Russian Empire")
@@ -41,7 +47,7 @@ class AuthorQueryRepositoryTest {
 
     @Test
     public void should_select_existing_author_by_id_with_mandatory_fields_only() {
-        Author existingAuthor = givenExistingAuthor(Author.builder());
+        Author existingAuthor = authorGenerator.givenExistingAuthor(Author.builder());
 
         Optional<Author> foundAuthor = jdbi.onDemand(AuthorQueryRepository.class)
                 .findAuthorById(existingAuthor.getId());
@@ -54,7 +60,7 @@ class AuthorQueryRepositoryTest {
 
     @Test
     public void should_select_author_by_id() {
-        givenExistingAuthor(Author.builder());
+        authorGenerator.givenExistingAuthor(Author.builder());
 
         Optional<Author> foundAuthor = jdbi.onDemand(AuthorQueryRepository.class)
                 .findAuthorById(-1L);
@@ -62,18 +68,54 @@ class AuthorQueryRepositoryTest {
         assertThat(foundAuthor).isEmpty();
     }
 
-    // todo: tests for author name and author languages
-
-    private Author givenExistingAuthor(Author.AuthorBuilder authorBuilder) {
-        Author author = authorBuilder.build();
-        long authorId = jdbi.withHandle(handle ->
-                handle.createUpdate("insert into author(birth_year, death_year, whereabouts, photo) values (:birthYear, :deathYear, :whereabouts, :photo)")
-                        .bindBean(author)
-                        .executeAndReturnGeneratedKeys("id")
-                        .mapTo(Long.class)
-                        .one()
+    @Test
+    public void should_select_author_names() {
+        Author existingAuthor = authorGenerator.givenExistingAuthor(Author.builder());
+        List<AuthorName> existingNames = authorGenerator.givenExistingNames(
+                existingAuthor,
+                AuthorName.builder().name("Пушкин").language("RU").type(ORIGINAL.name()),
+                AuthorName.builder().name("Pushkin").language("EN").type(TRANSLITERATION.name())
         );
 
-        return authorBuilder.id(authorId).build();
+        List<AuthorName> foundNames = jdbi.onDemand(AuthorQueryRepository.class)
+                .findAuthorNames(existingAuthor);
+
+        assertThat(foundNames).isEqualTo(existingNames);
     }
+
+    @Test
+    public void should_select_empty_author_names() {
+        Author existingAuthor = authorGenerator.givenExistingAuthor(Author.builder());
+
+        List<AuthorName> foundNames = jdbi.onDemand(AuthorQueryRepository.class)
+                .findAuthorNames(existingAuthor);
+
+        assertThat(foundNames).isEmpty();
+    }
+
+    @Test
+    public void should_select_author_languages() {
+        Author existingAuthor = authorGenerator.givenExistingAuthor(Author.builder());
+        List<AuthorLanguage> existingLanguages = authorGenerator.givenExistingLanguages(
+                existingAuthor,
+                AuthorLanguage.builder().language("RU").isDefault(true),
+                AuthorLanguage.builder().language("EN").isDefault(false));
+
+        List<AuthorLanguage> foundLanguages = jdbi.onDemand(AuthorQueryRepository.class)
+                .findAuthorLanguages(existingAuthor);
+
+        assertThat(foundLanguages).isEqualTo(existingLanguages);
+    }
+
+    @Test
+    public void should_select_empty_author_languages() {
+        Author existingAuthor = authorGenerator.givenExistingAuthor(Author.builder());
+
+        List<AuthorLanguage> foundLanguages = jdbi.onDemand(AuthorQueryRepository.class)
+                .findAuthorLanguages(existingAuthor);
+
+        assertThat(foundLanguages).isEmpty();
+    }
+
+
 }

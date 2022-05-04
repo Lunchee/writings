@@ -1,10 +1,14 @@
 package lunchee.books.author.query;
 
+import lombok.Builder;
+import lombok.Value;
+
 import java.util.List;
 
-public record AuthorCard(
-        Author author,
-        List<AuthorName> names,
-        List<AuthorLanguage> languages
-) {
+@Value
+@Builder
+public class AuthorCard {
+    Author author;
+    List<AuthorName> names;
+    List<AuthorLanguage> languages;
 }
