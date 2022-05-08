@@ -12,7 +12,7 @@
     <groupId>com.github.lunchee</groupId>
     <artifactId>writings</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>books</name>
+    <name>writings</name>
     <description>Writings catalogue</description>
 
     <properties>
@@ -35,6 +35,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jooq</artifactId>
         </dependency>
 
         <dependency>
@@ -64,20 +68,13 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jdbi</groupId>
-            <artifactId>jdbi3-sqlobject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jdbi</groupId>
-            <artifactId>jdbi3-spring5</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -104,6 +101,48 @@
                         </exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <version>${jooq.version}</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generator>
+                        <database>
+                            <name>org.jooq.meta.extensions.ddl.DDLDatabase</name>
+                            <properties>
+                                <property>
+                                    <key>scripts</key>
+                                    <value>src/main/resources/db/migration/*.sql</value>
+                                </property>
+                                <property>
+                                    <key>sort</key>
+                                    <value>flyway</value>
+                                </property>
+                            </properties>
+                        </database>
+                        <target>
+                            <packageName>com.github.lunchee.writings.query.jooq</packageName>
+                            <directory>target/generated-sources</directory>
+                        </target>
+                    </generator>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jooq</groupId>
+                        <artifactId>jooq-meta-extensions</artifactId>
+                        <version>${jooq.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
