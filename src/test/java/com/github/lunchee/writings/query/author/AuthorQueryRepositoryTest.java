@@ -1,7 +1,7 @@
 package com.github.lunchee.writings.query.author;
 
-import com.github.lunchee.writings.configuration.QueryTest;
-import com.github.lunchee.writings.util.AuthorGenerator;
+import com.github.lunchee.writings.query.configuration.QueryTest;
+import com.github.lunchee.writings.query.generator.QueryAuthorGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,7 +20,7 @@ class AuthorQueryRepositoryTest {
     @Autowired
     private AuthorQueryRepository repository;
     @Autowired
-    private AuthorGenerator authorGenerator;
+    private QueryAuthorGenerator authorGenerator;
 
     @Test
     public void should_select_existing_author_by_id_with_all_fields_set() {

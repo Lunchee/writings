@@ -1,8 +1,6 @@
-package com.github.lunchee.writings.configuration;
+package com.github.lunchee.writings.query.configuration;
 
-import com.github.lunchee.writings.query.configuration.QueryRepository;
-import com.github.lunchee.writings.query.configuration.Query;
-import com.github.lunchee.writings.util.AuthorGenerator;
+import com.github.lunchee.writings.query.generator.QueryAuthorGenerator;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,7 +28,7 @@ import java.lang.annotation.*;
 @AutoConfigureJooq
 @ImportAutoConfiguration
 @ActiveProfiles("test")
-@Import(AuthorGenerator.class)
+@Import(QueryAuthorGenerator.class)
 public @interface QueryTest {
 
     /**

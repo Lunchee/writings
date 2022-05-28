@@ -4,7 +4,7 @@ import com.github.lunchee.writings.command.author.CreateAuthorCommand.CreateAuth
 import com.github.lunchee.writings.command.author.domain.AuthorError;
 import com.github.lunchee.writings.command.author.domain.NameType;
 import com.github.lunchee.writings.command.dictionary.Language;
-import com.github.lunchee.writings.configuration.CommandTest;
+import com.github.lunchee.writings.command.configuration.CommandTest;
 import org.assertj.vavr.api.VavrAssertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,14 +1,16 @@
 package com.github.lunchee.writings.command.dictionary;
 
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-import static lombok.AccessLevel.PROTECTED;
 import static com.github.lunchee.writings.command.utility.Validation.requireNotNull;
+import static lombok.AccessLevel.PROTECTED;
 
 @NoArgsConstructor(access = PROTECTED)
+@ToString
 public class ReferenceValue {
     private String typeCode;
     private String valueCode;

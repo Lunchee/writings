@@ -1,9 +1,10 @@
 package com.github.lunchee.writings.command.author.domain;
 
+import com.github.lunchee.writings.command.dictionary.Language;
 import io.vavr.control.Either;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import com.github.lunchee.writings.command.dictionary.Language;
+import lombok.ToString;
 
 import javax.annotation.Nonnull;
 import javax.persistence.Column;
@@ -12,13 +13,14 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import java.util.Objects;
 
-import static lombok.AccessLevel.PROTECTED;
 import static com.github.lunchee.writings.command.author.domain.NameType.ORIGINAL;
 import static com.github.lunchee.writings.command.author.domain.NameType.TRANSLITERATION;
 import static com.github.lunchee.writings.command.utility.Validation.requireNotNull;
+import static lombok.AccessLevel.PROTECTED;
 
 @Embeddable
 @NoArgsConstructor(access = PROTECTED)
+@ToString
 public class AuthorName {
 
     @Getter

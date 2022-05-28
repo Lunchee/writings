@@ -1,9 +1,9 @@
 package com.github.lunchee.writings.command.author.domain;
 
+import com.github.lunchee.writings.command.dictionary.Language;
 import io.vavr.control.Either;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import com.github.lunchee.writings.command.dictionary.Language;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,7 +24,7 @@ public class Author {
     private Long id;
 
     @Embedded
-    private final AuthorNames names = new AuthorNames(this);
+    private final AuthorNames names = new AuthorNames();
 
     @Embedded
     private final LifeAges lifeAges = new LifeAges();
@@ -49,17 +49,17 @@ public class Author {
                 .map(ok -> this);
     }
 
-    public Either<AuthorError, Author> changeName(@Nonnull Long id, @Nonnull AuthorName newName) {
-        return names.change(id, newName)
+    public Either<AuthorError, Author> changeName(int nameOrder, @Nonnull AuthorName newName) {
+        return names.change(nameOrder, newName)
                 .map(ok -> this);
     }
 
-    public Either<AuthorError, Author> removeName(@Nonnull Long id) {
-        return names.remove(id)
+    public Either<AuthorError, Author> removeName(int nameOrder) {
+        return names.remove(nameOrder)
                 .map(ok -> this);
     }
 
-    public List<AuthorNameEntity> getNames() {
+    public List<AuthorName> getNames() {
         return names.getNames();
     }
 

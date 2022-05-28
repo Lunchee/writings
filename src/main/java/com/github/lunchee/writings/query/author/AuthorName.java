@@ -6,8 +6,8 @@ import lombok.Value;
 @Value
 @Builder
 public class AuthorName {
-    Long id;
     long authorId;
+    int nameOrder;
     String name;
     String type;
     String language;

@@ -17,9 +17,7 @@ class AuthorAddNameTest {
         VavrAssertions.assertThat(author.addName(newName))
                 .isRight();
 
-        assertThat(author.getNames())
-                .extracting(AuthorNameEntity::getName)
-                .containsExactlyInAnyOrder(existingName, newName);
+        assertThat(author.getNames()).containsExactlyInAnyOrder(existingName, newName);
     }
 
     @Test
@@ -31,9 +29,7 @@ class AuthorAddNameTest {
         VavrAssertions.assertThat(author.addName(duplicatingName))
                 .containsOnLeft(AuthorError.NAME_OCCUPIED);
 
-        assertThat(author.getNames())
-                .extracting(AuthorNameEntity::getName)
-                .containsOnly(existingName);
+        assertThat(author.getNames()).containsOnly(existingName);
     }
 
     @Test
@@ -45,9 +41,7 @@ class AuthorAddNameTest {
                 .flatMap(it -> it.addName(secondOriginalName));
 
         VavrAssertions.assertThat(author).hasRightValueSatisfying(it ->
-                assertThat(it.getNames())
-                        .extracting(AuthorNameEntity::getName)
-                        .containsExactlyInAnyOrder(firstOriginalName, secondOriginalName));
+                assertThat(it.getNames()).containsExactly(firstOriginalName, secondOriginalName));
     }
 
     @Test
@@ -59,9 +53,7 @@ class AuthorAddNameTest {
                 .flatMap(it -> it.addName(russianOriginalName));
 
         VavrAssertions.assertThat(author).hasRightValueSatisfying(it ->
-                assertThat(it.getNames())
-                        .extracting(AuthorNameEntity::getName)
-                        .containsExactlyInAnyOrder(englishOriginalName, russianOriginalName));
+                assertThat(it.getNames()).containsExactly(englishOriginalName, russianOriginalName));
     }
 
     @Test
@@ -95,9 +87,7 @@ class AuthorAddNameTest {
                 .flatMap(it -> it.addName(secondTransliterationName));
 
         VavrAssertions.assertThat(author).hasRightValueSatisfying(it ->
-                assertThat(it.getNames())
-                        .extracting(AuthorNameEntity::getName)
-                        .containsExactlyInAnyOrder(firstTransliterationName, secondTransliterationName));
+                assertThat(it.getNames()).containsExactly(firstTransliterationName, secondTransliterationName));
     }
 
     @Test
@@ -109,9 +99,7 @@ class AuthorAddNameTest {
                 .flatMap(it -> it.addName(secondTransliterationName));
 
         VavrAssertions.assertThat(author).hasRightValueSatisfying(it ->
-                assertThat(it.getNames())
-                        .extracting(AuthorNameEntity::getName)
-                        .containsExactlyInAnyOrder(firstTransliterationName, secondTransliterationName));
+                assertThat(it.getNames()).containsExactly(firstTransliterationName, secondTransliterationName));
     }
 
     @Test
@@ -123,8 +111,6 @@ class AuthorAddNameTest {
                 .flatMap(it -> it.addName(secondLanguageName));
 
         VavrAssertions.assertThat(author).hasRightValueSatisfying(it ->
-                assertThat(it.getNames())
-                        .extracting(AuthorNameEntity::getName)
-                        .containsExactlyInAnyOrder(firstLanguageName, secondLanguageName));
+                assertThat(it.getNames()).containsExactly(firstLanguageName, secondLanguageName));
     }
 }

@@ -1,39 +1,33 @@
 package com.github.lunchee.writings.command.author.domain;
 
+import com.github.lunchee.writings.command.dictionary.Language;
 import io.vavr.control.Either;
 import lombok.NoArgsConstructor;
 
 import javax.annotation.Nonnull;
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
-import javax.persistence.OneToMany;
-import javax.persistence.Transient;
+import javax.persistence.OrderColumn;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Collections.unmodifiableList;
-import static javax.persistence.CascadeType.ALL;
-import static lombok.AccessLevel.PROTECTED;
 import static com.github.lunchee.writings.command.author.domain.NameType.ORIGINAL;
 import static com.github.lunchee.writings.command.author.domain.NameType.TRANSLITERATION;
-import static com.github.lunchee.writings.command.utility.Validation.requireNotNull;
+import static java.util.Collections.unmodifiableList;
+import static lombok.AccessLevel.PROTECTED;
 
 @Embeddable
 @NoArgsConstructor(access = PROTECTED)
 public class AuthorNames {
 
-    @Transient
-    private Author author;
+    @ElementCollection
+    @CollectionTable(name = "author_name")
+    @OrderColumn(name = "name_order")
+    private final List<AuthorName> names = new ArrayList<>();
 
-    @OneToMany(mappedBy = "author", cascade = ALL, orphanRemoval = true)
-    private final List<AuthorNameEntity> names = new ArrayList<>();
-
-    public AuthorNames(@Nonnull Author author) {
-        this.author = requireNotNull(author, "author");
-    }
-
-    public Either<AuthorError, AuthorNameEntity> add(@Nonnull AuthorName name) {
+    public Either<AuthorError, AuthorName> add(@Nonnull AuthorName name) {
         return checkNameCanBeAdded(name)
-                .map(ok -> new AuthorNameEntity(author, name))
                 .peek(names::add);
     }
 
@@ -43,7 +37,8 @@ public class AuthorNames {
     }
 
     private Either<AuthorError, AuthorName> checkNameAvailable(AuthorName newName) {
-        return names.stream().anyMatch(existingName -> existingName.getName().equals(newName))
+        return names.stream()
+                .anyMatch(existingName -> existingName.equals(newName))
                 ? Either.left(AuthorError.NAME_OCCUPIED)
                 : Either.right(newName);
     }
@@ -54,37 +49,53 @@ public class AuthorNames {
                 : Either.right(newName);
     }
 
-    private boolean isTransliterationLanguageEqualsOriginalLanguage(AuthorName newName, AuthorNameEntity name) {
+    private boolean isTransliterationLanguageEqualsOriginalLanguage(AuthorName newName, AuthorName name) {
         return name.getLanguage().equals(newName.getLanguage())
-                && name.getNameType() == (newName.isOriginal() ? TRANSLITERATION : ORIGINAL);
+                && name.getType() == (newName.isOriginal() ? TRANSLITERATION : ORIGINAL);
     }
 
-    public Either<AuthorError, AuthorNameEntity> change(@Nonnull Long id, @Nonnull AuthorName newName) {
-        Either<AuthorError, AuthorNameEntity> nameToChange = getNameById(id);
-        if (nameToChange.isRight()) {
-            return nameToChange.map(names::remove)
-                    .flatMap(removed -> add(newName))
-                    .peekLeft(error -> names.add(nameToChange.get()));
+    public Either<AuthorError, AuthorName> change(int nameOrder, @Nonnull AuthorName newName) {
+        Either<AuthorError, AuthorName> existingName = getNameByOrder(nameOrder);
+        if (existingName.isRight()) {
+            names.set(nameOrder, new DeletedAuthorName());
+            return set(nameOrder, newName)
+                    .peekLeft(error -> names.set(nameOrder, existingName.get()));
         } else {
-            return nameToChange;
+            return existingName;
         }
     }
 
-    private Either<AuthorError, AuthorNameEntity> getNameById(Long id) {
-        return names.stream()
-                .filter(name -> name.getId().equals(id))
-                .findFirst()
-                .map(Either::<AuthorError, AuthorNameEntity>right)
-                .orElseGet(() -> Either.left(AuthorError.NAME_NOT_FOUND));
+    private Either<AuthorError, AuthorName> set(int position, AuthorName name) {
+        return checkNameCanBeAdded(name)
+                .peek(ok -> names.set(position, name));
     }
 
-    public Either<AuthorError, AuthorNameEntity> remove(@Nonnull Long id) {
-        return getNameById(id)
-                .peek(names::remove)
-                .peek(AuthorNameEntity::removeAuthor);
+    private Either<AuthorError, AuthorName> getNameByOrder(int nameOrder) {
+        try {
+            return Either.right(names.get(nameOrder));
+        } catch (IndexOutOfBoundsException exception) {
+            return Either.left(AuthorError.NAME_NOT_FOUND);
+        }
     }
 
-    public List<AuthorNameEntity> getNames() {
+    public Either<AuthorError, AuthorName> remove(int nameOrder) {
+        return getNameByOrder(nameOrder)
+                .peek(names::remove);
+    }
+
+    public List<AuthorName> getNames() {
         return unmodifiableList(names);
+    }
+
+    private static class DeletedAuthorName extends AuthorName {
+
+        public DeletedAuthorName() {
+            super("DELETED", TRANSLITERATION, new Language("DELETED"));
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return false;
+        }
     }
 }

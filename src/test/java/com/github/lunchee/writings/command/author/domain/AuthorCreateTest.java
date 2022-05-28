@@ -1,7 +1,7 @@
 package com.github.lunchee.writings.command.author.domain;
 
-import io.vavr.control.Either;
 import com.github.lunchee.writings.command.dictionary.Language;
+import io.vavr.control.Either;
 import org.assertj.vavr.api.VavrAssertions;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,6 @@ public class AuthorCreateTest {
 
         VavrAssertions.assertThat(author).hasRightValueSatisfying(it ->
                 assertThat(it.getNames())
-                        .extracting(AuthorNameEntity::getName)
                         .containsExactly(authorName)
         );
     }

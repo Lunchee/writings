@@ -1,4 +1,4 @@
-package com.github.lunchee.writings.configuration;
+package com.github.lunchee.writings.query.configuration;
 
 import org.springframework.boot.test.autoconfigure.filter.StandardAnnotationCustomizableTypeExcludeFilter;
 

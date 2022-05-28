@@ -1,4 +1,4 @@
-package com.github.lunchee.writings.configuration;
+package com.github.lunchee.writings.command.configuration;
 
 import com.github.lunchee.writings.command.utility.Command;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

@@ -1,4 +1,4 @@
-package com.github.lunchee.writings.util;
+package com.github.lunchee.writings.query.generator;
 
 import com.github.lunchee.writings.query.author.Author;
 import com.github.lunchee.writings.query.author.AuthorLanguage;
@@ -8,11 +8,12 @@ import org.jooq.DSLContext;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.lunchee.writings.query.jooq.Tables.*;
 
 @RequiredArgsConstructor
-public class AuthorGenerator {
+public class QueryAuthorGenerator {
 
     private final DSLContext create;
 
@@ -25,18 +26,20 @@ public class AuthorGenerator {
     }
 
     public List<AuthorName> givenExistingNames(Author author, AuthorName.AuthorNameBuilder... authorNames) {
+        AtomicInteger nameOrder = new AtomicInteger();
         return Arrays.stream(authorNames)
-                .map(authorName -> authorName.authorId(author.getId()))
+                .map(it -> it.authorId(author.getId()))
+                .map(it -> it.nameOrder(nameOrder.getAndIncrement()))
                 .map(this::insertAuthorName)
                 .toList();
     }
 
     private AuthorName insertAuthorName(AuthorName.AuthorNameBuilder authorName) {
-        return create.insertInto(AUTHOR_NAME)
+        create.insertInto(AUTHOR_NAME)
                 .set(create.newRecord(AUTHOR_NAME, authorName.build()))
-                .returning()
-                .fetchOne()
-                .into(AuthorName.class);
+                .execute();
+
+        return authorName.build();
     }
 
     public List<AuthorLanguage> givenExistingLanguages(Author author, AuthorLanguage.AuthorLanguageBuilder... authorLanguages) {
