@@ -113,4 +113,18 @@ class AuthorAddNameTest {
                         .extracting(AuthorNameEntity::getName)
                         .containsExactlyInAnyOrder(firstTransliterationName, secondTransliterationName));
     }
+
+    @Test
+    public void author_names_sound_same_in_different_languages() {
+        var firstLanguageName = AuthorName.create("Пичу", NameType.ORIGINAL, new Language("RU")).get();
+        var secondLanguageName = AuthorName.create("Пичу", NameType.TRANSLITERATION, new Language("BG")).get();
+
+        var author = Author.create(firstLanguageName)
+                .flatMap(it -> it.addName(secondLanguageName));
+
+        VavrAssertions.assertThat(author).hasRightValueSatisfying(it ->
+                assertThat(it.getNames())
+                        .extracting(AuthorNameEntity::getName)
+                        .containsExactlyInAnyOrder(firstLanguageName, secondLanguageName));
+    }
 }
